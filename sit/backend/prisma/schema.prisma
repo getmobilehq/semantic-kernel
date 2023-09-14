@@ -1,0 +1,764 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model user {
+  id                      Int                       @id @default(autoincrement())
+  firstName               String?
+  lastName                String?
+  userName                String                    @unique
+  password                String
+  email                   String?                   @unique
+  phone                   String?                   @unique
+  // address
+  street                  String?
+  city                    String?
+  state                   String?
+  zipCode                 String?
+  country                 String?
+  joinDate                DateTime?
+  leaveDate               DateTime?
+  employeeId              String?                   @unique
+  bloodGroup              String?
+  image                   String?
+  employmentStatus        employmentStatus?         @relation(fields: [employmentStatusId], references: [id])
+  employmentStatusId      Int?
+  department              department?               @relation(fields: [departmentId], references: [id])
+  departmentId            Int?
+  role                    role?                     @relation(fields: [roleId], references: [id])
+  roleId                  Int?
+  shift                   shift?                    @relation(fields: [shiftId], references: [id])
+  shiftId                 Int?
+  educations              education[]
+  salaryHistory           salaryHistory[]
+  designationHistory      designationHistory[]
+  awardHistory            awardHistory[]
+  status                  Boolean                   @default(true)
+  createdAt               DateTime                  @default(now())
+  updatedAt               DateTime                  @updatedAt
+  contact                 contact[]
+  company                 company[]
+  opportunity             opportunity[]
+  quote                   quote[]
+  crmTask                 crmTask[]
+  crmEmail                crmEmail[]
+  note                    note[]
+  attachment              attachment[]
+  ticketCategoryUserGroup ticketCategoryUserGroup[]
+}
+
+model education {
+  id           Int       @id @default(autoincrement())
+  user         user      @relation(fields: [userId], references: [id])
+  userId       Int
+  degree       String
+  institution  String
+  fieldOfStudy String
+  result       String
+  startDate    DateTime
+  endDate      DateTime?
+  status       Boolean   @default(true)
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+}
+
+// manage salary history of employee
+model salaryHistory {
+  id        Int       @id @default(autoincrement())
+  user      user      @relation(fields: [userId], references: [id])
+  userId    Int
+  salary    Float
+  startDate String
+  endDate   DateTime?
+  comment   String?
+  status    Boolean   @default(true)
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+}
+
+model designation {
+  id   Int    @id @default(autoincrement())
+  name String @unique
+
+  designationHistory designationHistory[]
+
+  status    Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model department {
+  id     Int     @id @default(autoincrement())
+  name   String
+  status Boolean @default(true)
+  user   user[]
+}
+
+model employmentStatus {
+  id          Int      @id @default(autoincrement())
+  name        String   @unique
+  colourValue String
+  description String?
+  user        user[]
+  status      Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+// designation history of employee
+model designationHistory {
+  id            Int         @id @default(autoincrement())
+  user          user        @relation(fields: [userId], references: [id])
+  userId        Int
+  designation   designation @relation(fields: [designationId], references: [id])
+  designationId Int
+  startDate     DateTime
+  endDate       DateTime?
+  comment       String?
+}
+
+model shift {
+  id        Int      @id @default(autoincrement())
+  name      String   @unique
+  startTime DateTime @db.Time
+  endTime   DateTime @db.Time
+  workHour  Float
+  user      user[]
+  status    Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model award {
+  id           Int            @id @default(autoincrement())
+  name         String         @unique
+  description  String?
+  image        String?
+  status       Boolean        @default(true)
+  createdAt    DateTime       @default(now())
+  updatedAt    DateTime       @updatedAt
+  awardHistory awardHistory[]
+}
+
+model awardHistory {
+  id          Int      @id @default(autoincrement())
+  user        user     @relation(fields: [userId], references: [id])
+  userId      Int
+  award       award    @relation(fields: [awardId], references: [id])
+  awardId     Int
+  awardedDate DateTime
+  comment     String?
+  status      Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model announcement {
+  id          Int      @id @default(autoincrement())
+  title       String
+  description String
+  status      Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+//crm schema
+model contact {
+  id               Int           @id @default(autoincrement())
+  contactOwner     user          @relation(fields: [contactOwnerId], references: [id], onDelete: Cascade)
+  contactOwnerId   Int
+  contactSource    contactSource @relation(fields: [contactSourceId], references: [id], onDelete: Cascade)
+  contactSourceId  Int
+  contactStage     contactStage  @relation(fields: [contactStageId], references: [id], onDelete: Cascade)
+  contactStageId   Int
+  image            String?
+  firstName        String
+  lastName         String
+  dateOfBirth      DateTime?
+  company          company?      @relation(fields: [companyId], references: [id], onDelete: SetNull)
+  companyId        Int?
+  jobTitle         String?
+  department       String?
+  industry         industry?     @relation(fields: [industryId], references: [id], onDelete: SetNull)
+  industryId       Int?
+  email            String
+  phone            String
+  twitter          String?
+  linkedin         String?
+  presentAddress   String?
+  presentCity      String?
+  presentZipCode   String?
+  presentState     String?
+  presentCountry   String?
+  permanentAddress String?
+  permanentCity    String?
+  permanentZipCode String?
+  permanentState   String?
+  permanentCountry String?
+  description      String?
+  status           Boolean       @default(true)
+  createdAt        DateTime      @default(now())
+  updatedAt        DateTime      @updatedAt
+  opportunity      opportunity[]
+  quote            quote[]
+  crmTask          crmTask[]
+  note             note[]
+  attachment       attachment[]
+  crmEmail         crmEmail[]
+}
+
+model contactSource {
+  id                Int       @id @default(autoincrement())
+  contactSourceName String
+  status            Boolean   @default(true)
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
+  contact           contact[]
+}
+
+model contactStage {
+  id               Int       @id @default(autoincrement())
+  contactStageName String
+  status           Boolean   @default(true)
+  createdAt        DateTime  @default(now())
+  updatedAt        DateTime  @updatedAt
+  contact          contact[]
+}
+
+model industry {
+  id           Int       @id @default(autoincrement())
+  industryName String
+  status       Boolean   @default(true)
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+  contact      contact[]
+  company      company[]
+}
+
+model company {
+  id              Int           @id @default(autoincrement())
+  companyOwner    user          @relation(fields: [companyOwnerId], references: [id], onDelete: Cascade)
+  companyOwnerId  Int
+  companyName     String
+  image           String?
+  industry        industry      @relation(fields: [industryId], references: [id], onDelete: Cascade)
+  industryId      Int
+  companyType     companyType   @relation(fields: [companyTypeId], references: [id], onDelete: Cascade)
+  companyTypeId   Int
+  companySize     Int?
+  annualRevenue   Int?
+  //contact
+  website         String?
+  phone           String
+  email           String
+  //social media profiles
+  linkedin        String?
+  twitter         String?
+  instagram       String?
+  facebook        String?
+  //billing address
+  billingStreet   String?
+  billingCity     String?
+  billingZipCode  String?
+  billingState    String?
+  billingCountry  String?
+  //shipping address
+  shippingStreet  String?
+  shippingCity    String?
+  shippingZipCode String?
+  shippingState   String?
+  shippingCountry String?
+  status          Boolean       @default(true)
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
+  opportunity     opportunity[]
+  contact         contact[]
+  quote           quote[]
+  crmTask         crmTask[]
+  note            note[]
+  attachment      attachment[]
+  crmEmail        crmEmail[]
+}
+
+model companyType {
+  id              Int       @id @default(autoincrement())
+  companyTypeName String
+  status          Boolean   @default(true)
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+  company         company[]
+}
+
+model opportunity {
+  id                    Int                @id @default(autoincrement())
+  opportunityOwner      user               @relation(fields: [opportunityOwnerId], references: [id], onDelete: Cascade)
+  opportunityOwnerId    Int
+  contact               contact?           @relation(fields: [contactId], references: [id], onDelete: SetNull)
+  contactId             Int?
+  company               company?           @relation(fields: [companyId], references: [id], onDelete: SetNull)
+  companyId             Int?
+  opportunityName       String
+  amount                Float?
+  opportunityType       opportunityType?   @relation(fields: [opportunityTypeId], references: [id], onDelete: SetNull)
+  opportunityTypeId     Int?
+  opportunityStage      opportunityStage?  @relation(fields: [opportunityStageId], references: [id], onDelete: SetNull)
+  opportunityStageId    Int?
+  opportunitySource     opportunitySource? @relation(fields: [opportunitySourceId], references: [id], onDelete: SetNull)
+  opportunitySourceId   Int?
+  opportunityCreateDate DateTime?
+  opportunityCloseDate  DateTime?
+  nextStep              String?
+  competitors           String?
+  description           String?
+  status                Boolean            @default(true)
+  createdAt             DateTime           @default(now())
+  updatedAt             DateTime           @updatedAt
+  quote                 quote[]
+  crmTask               crmTask[]
+  note                  note[]
+  attachment            attachment[]
+  crmEmail              crmEmail[]
+}
+
+model opportunitySource {
+  id                    Int           @id @default(autoincrement())
+  opportunitySourceName String
+  status                Boolean       @default(true)
+  createdAt             DateTime      @default(now())
+  updatedAt             DateTime      @updatedAt
+  opportunity           opportunity[]
+}
+
+model opportunityStage {
+  id                   Int           @id @default(autoincrement())
+  opportunityStageName String
+  status               Boolean       @default(true)
+  createdAt            DateTime      @default(now())
+  updatedAt            DateTime      @updatedAt
+  opportunity          opportunity[]
+}
+
+model opportunityType {
+  id                  Int           @id @default(autoincrement())
+  opportunityTypeName String
+  status              Boolean       @default(true)
+  createdAt           DateTime      @default(now())
+  updatedAt           DateTime      @updatedAt
+  opportunity         opportunity[]
+}
+
+model quote {
+  id                 Int            @id @default(autoincrement())
+  quoteOwner         user           @relation(fields: [quoteOwnerId], references: [id], onDelete: Cascade)
+  quoteOwnerId       Int
+  quoteName          String
+  quoteDate          DateTime
+  opportunity        opportunity?   @relation(fields: [opportunityId], references: [id], onDelete: SetNull)
+  opportunityId      Int?
+  company            company?       @relation(fields: [companyId], references: [id], onDelete: SetNull)
+  companyId          Int?
+  contact            contact?       @relation(fields: [contactId], references: [id], onDelete: SetNull)
+  contactId          Int?
+  expirationDate     DateTime?
+  quoteStage         quoteStage?    @relation(fields: [quoteStageId], references: [id], onDelete: SetNull)
+  quoteStageId       Int?
+  termsAndConditions String?
+  description        String?
+  discount           Float?
+  totalAmount        Float?
+  status             Boolean        @default(true)
+  createdAt          DateTime       @default(now())
+  updatedAt          DateTime       @updatedAt
+  quoteProduct       quoteProduct[]
+  crmTask            crmTask[]
+  note               note[]
+  attachment         attachment[]
+  crmEmail           crmEmail[]
+}
+
+model quoteProduct {
+  id              Int      @id @default(autoincrement())
+  quote           quote    @relation(fields: [quoteId], references: [id], onDelete: Cascade)
+  quoteId         Int
+  product         product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+  productId       Int
+  unitPrice       Float?
+  productQuantity Int?
+  status          Boolean  @default(true)
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+}
+
+model product {
+  id           Int            @id @default(autoincrement())
+  productName  String
+  status       Boolean        @default(true)
+  createdAt    DateTime       @default(now())
+  updatedAt    DateTime       @updatedAt
+  quoteProduct quoteProduct[]
+}
+
+model quoteStage {
+  id             Int      @id @default(autoincrement())
+  quoteStageName String
+  status         Boolean  @default(true)
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+  quote          quote[]
+}
+
+model crmTask {
+  id             Int             @id @default(autoincrement())
+  taskName       String
+  taskType       crmTaskType     @relation(fields: [taskTypeId], references: [id], onDelete: Cascade)
+  taskTypeId     Int
+  taskPriority   crmTaskPriority @relation(fields: [taskPriorityId], references: [id], onDelete: Cascade)
+  taskPriorityId Int
+  taskStatus     crmTaskStatus   @relation(fields: [taskStatusId], references: [id], onDelete: Cascade)
+  taskStatusId   Int
+  assignee       user            @relation(fields: [assigneeId], references: [id], onDelete: Cascade)
+  assigneeId     Int
+  contact        contact?        @relation(fields: [contactId], references: [id], onDelete: SetNull)
+  contactId      Int?
+  company        company?        @relation(fields: [companyId], references: [id], onDelete: SetNull)
+  companyId      Int?
+  opportunity    opportunity?    @relation(fields: [opportunityId], references: [id], onDelete: SetNull)
+  opportunityId  Int?
+  quote          quote?          @relation(fields: [quoteId], references: [id], onDelete: SetNull)
+  quoteId        Int?
+  dueDate        DateTime
+  notes          String?
+  status         Boolean         @default(true)
+  createdAt      DateTime        @default(now())
+  updatedAt      DateTime        @updatedAt
+}
+
+model crmTaskType {
+  id           Int       @id @default(autoincrement())
+  taskTypeName String
+  status       Boolean   @default(true)
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+  crmTask      crmTask[]
+}
+
+model crmTaskStatus {
+  id             Int       @id @default(autoincrement())
+  taskStatusName String
+  status         Boolean   @default(true)
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+  crmTask        crmTask[]
+}
+
+model crmTaskPriority {
+  id               Int       @id @default(autoincrement())
+  taskPriorityName String
+  status           Boolean   @default(true)
+  createdAt        DateTime  @default(now())
+  updatedAt        DateTime  @updatedAt
+  crmTask          crmTask[]
+}
+
+model email {
+  id            Int      @id @default(autoincrement())
+  senderEmail   String
+  receiverEmail String
+  subject       String?
+  body          String?
+  emailStatus   String?
+  status        Boolean  @default(true)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+  cc            cc[]
+  bcc           bcc[]
+}
+
+model cc {
+  id         Int       @id @default(autoincrement())
+  email      email?    @relation(fields: [emailId], references: [id], onDelete: Cascade)
+  emailId    Int?
+  crmEmail   crmEmail? @relation(fields: [crmEmailId], references: [id], onDelete: Cascade)
+  crmEmailId Int?
+  ccEmail    String
+  status     Boolean   @default(true)
+  createdAt  DateTime  @default(now())
+  updatedAt  DateTime  @updatedAt
+}
+
+model bcc {
+  id         Int       @id @default(autoincrement())
+  email      email?    @relation(fields: [emailId], references: [id], onDelete: Cascade)
+  emailId    Int?
+  crmEmail   crmEmail? @relation(fields: [crmEmailId], references: [id], onDelete: Cascade)
+  crmEmailId Int?
+  bccEmail   String
+  status     Boolean   @default(true)
+  createdAt  DateTime  @default(now())
+  updatedAt  DateTime  @updatedAt
+}
+
+model emailConfig {
+  id              Int      @id @default(autoincrement())
+  emailConfigName String
+  emailHost       String
+  emailPort       Int
+  emailUser       String
+  emailPass       String
+  status          Boolean  @default(true)
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+}
+
+model crmEmail {
+  id            Int          @id @default(autoincrement())
+  emailOwner    user         @relation(fields: [emailOwnerId], references: [id], onDelete: Cascade)
+  emailOwnerId  Int
+  contact       contact?     @relation(fields: [contactId], references: [id], onDelete: SetNull)
+  contactId     Int?
+  company       company?     @relation(fields: [companyId], references: [id], onDelete: SetNull)
+  companyId     Int?
+  opportunity   opportunity? @relation(fields: [opportunityId], references: [id], onDelete: SetNull)
+  opportunityId Int?
+  quote         quote?       @relation(fields: [quoteId], references: [id], onDelete: SetNull)
+  quoteId       Int?
+  senderEmail   String
+  receiverEmail String
+  subject       String?
+  body          String?
+  emailStatus   String?
+  status        Boolean      @default(true)
+  createdAt     DateTime     @default(now())
+  updatedAt     DateTime     @updatedAt
+  cc            cc[]
+  bcc           bcc[]
+}
+
+model note {
+  id            Int          @id @default(autoincrement())
+  noteOwner     user         @relation(fields: [noteOwnerId], references: [id], onDelete: Cascade)
+  noteOwnerId   Int
+  contact       contact?     @relation(fields: [contactId], references: [id], onDelete: Cascade)
+  contactId     Int?
+  company       company?     @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  companyId     Int?
+  opportunity   opportunity? @relation(fields: [opportunityId], references: [id], onDelete: Cascade)
+  opportunityId Int?
+  quote         quote?       @relation(fields: [quoteId], references: [id], onDelete: Cascade)
+  quoteId       Int?
+  title         String
+  description   String
+  status        Boolean      @default(true)
+  createdAt     DateTime     @default(now())
+  updatedAt     DateTime     @updatedAt
+}
+
+model attachment {
+  id                Int          @id @default(autoincrement())
+  attachmentOwner   user         @relation(fields: [attachmentOwnerId], references: [id], onDelete: Cascade)
+  attachmentOwnerId Int
+  contact           contact?     @relation(fields: [contactId], references: [id], onDelete: Cascade)
+  contactId         Int?
+  company           company?     @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  companyId         Int?
+  opportunity       opportunity? @relation(fields: [opportunityId], references: [id], onDelete: Cascade)
+  opportunityId     Int?
+  quote             quote?       @relation(fields: [quoteId], references: [id], onDelete: Cascade)
+  quoteId           Int?
+  attachmentName    String
+  attachmentPath    String
+  status            Boolean      @default(true)
+  createdAt         DateTime     @default(now())
+  updatedAt         DateTime     @updatedAt
+}
+
+//customer
+model customer {
+  id             Int       @id @default(autoincrement())
+  role           role      @relation(fields: [roleId], references: [id])
+  roleId         Int
+  image          String?
+  firstName      String?
+  lastName       String?
+  email          String
+  password       String?
+  phone          String?
+  dateOfBirth    DateTime?
+  jobTitle       String?
+  socialMediaUrl String?
+  address        String?
+  city           String?
+  state          String?
+  zip            String?
+  country        String?
+  status         Boolean   @default(true)
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+  ticket         ticket[]
+}
+
+//ticket system schema
+model ticket {
+  id                Int             @id @default(autoincrement())
+  ticketId          Int             @unique
+  customer          customer        @relation(fields: [customerId], references: [id], onDelete: Cascade)
+  customerId        Int
+  email             String?
+  subject           String
+  description       String
+  ticketResolveTime String?
+  ticketCategory    ticketCategory  @relation(fields: [ticketCategoryId], references: [id])
+  ticketCategoryId  Int
+  ticketStatus      ticketStatus    @relation(fields: [ticketStatusId], references: [id])
+  ticketStatusId    Int
+  ticketPriority    ticketPriority? @relation(fields: [ticketPriorityId], references: [id])
+  ticketPriorityId  Int?
+  status            Boolean         @default(true)
+  createdAt         DateTime        @default(now())
+  updatedAt         DateTime        @updatedAt
+  ticketComment     ticketComment[]
+  images            images[]
+}
+
+model ticketComment {
+  id          Int      @id @default(autoincrement())
+  ticket      ticket   @relation(fields: [ticketId], references: [ticketId], onDelete: Cascade)
+  ticketId    Int
+  repliedBy   String
+  userType    String
+  description String
+  status      Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  images      images[]
+}
+
+model images {
+  id              Int            @id @default(autoincrement())
+  ticket          ticket?        @relation(fields: [ticketId], references: [id], onDelete: Cascade)
+  ticketId        Int?
+  ticketComment   ticketComment? @relation(fields: [ticketCommentId], references: [id], onDelete: Cascade)
+  ticketCommentId Int?
+  imageName       String?
+  status          Boolean        @default(true)
+  createdAt       DateTime       @default(now())
+  updatedAt       DateTime       @updatedAt
+}
+
+model ticketStatus {
+  id               Int      @id @default(autoincrement())
+  ticketStatusName String
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+  ticket           ticket[]
+}
+
+model ticketCategory {
+  id                      Int                       @id @default(autoincrement())
+  ticketCategoryName      String
+  createdAt               DateTime                  @default(now())
+  updatedAt               DateTime                  @updatedAt
+  ticket                  ticket[]
+  ticketCategoryUserGroup ticketCategoryUserGroup[]
+}
+
+model ticketPriority {
+  id                 Int      @id @default(autoincrement())
+  ticketPriorityName String
+  createdAt          DateTime @default(now())
+  updatedAt          DateTime @updatedAt
+  ticket             ticket[]
+}
+
+model ticketCategoryUserGroup {
+  id               Int            @id @default(autoincrement())
+  ticketCategory   ticketCategory @relation(fields: [ticketCategoryId], references: [id])
+  ticketCategoryId Int
+  user             user           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId           Int
+  status           Boolean        @default(true)
+  createdAt        DateTime       @default(now())
+  updatedAt        DateTime       @updatedAt
+}
+
+model role {
+  id             Int              @id @default(autoincrement())
+  name           String           @unique
+  status         Boolean          @default(true)
+  rolePermission rolePermission[]
+  createdAt      DateTime         @default(now())
+  updatedAt      DateTime         @updatedAt
+  user           user[]
+  customer       customer[]
+}
+
+model permission {
+  id             Int              @id @default(autoincrement())
+  name           String           @unique
+  rolePermission rolePermission[]
+  createdAt      DateTime         @default(now())
+  updatedAt      DateTime         @updatedAt
+}
+
+// role_id and permission_id are composite unique keys
+model rolePermission {
+  id            Int        @id @default(autoincrement())
+  role          role       @relation(fields: [role_id], references: [id], onDelete: Cascade)
+  role_id       Int
+  permission    permission @relation(fields: [permission_id], references: [id], onDelete: Cascade)
+  permission_id Int
+  status        Boolean    @default(true)
+  createdAt     DateTime   @default(now())
+  updatedAt     DateTime   @updatedAt
+
+  @@unique([role_id, permission_id])
+}
+
+model account {
+  id         Int          @id @default(autoincrement())
+  name       String       @unique
+  type       String
+  subAccount subAccount[]
+}
+
+model subAccount {
+  id         Int           @id @default(autoincrement())
+  name       String        @unique
+  account    account       @relation(fields: [account_id], references: [id])
+  account_id Int
+  debit      transaction[] @relation("debit")
+  credit     transaction[] @relation("credit")
+  status     Boolean       @default(true)
+}
+
+model transaction {
+  id          Int        @id @default(autoincrement())
+  date        DateTime
+  debit       subAccount @relation("debit", fields: [debit_id], references: [id], onDelete: Cascade)
+  debit_id    Int
+  credit      subAccount @relation("credit", fields: [credit_id], references: [id], onDelete: Cascade)
+  credit_id   Int
+  particulars String
+  amount      Float
+  type        String?
+  related_id  Int?
+  status      Boolean    @default(true)
+  created_at  DateTime   @default(now())
+  updated_at  DateTime   @updatedAt
+}
+
+model appSetting {
+  id           Int    @id @default(autoincrement())
+  company_name String
+  tag_line     String
+  address      String
+  phone        String
+  email        String
+  website      String
+  footer       String
+}
